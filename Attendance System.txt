@@ -1,0 +1,60 @@
+import sqlite3
+
+conn = sqlite3.connect("attendance.db")
+c = conn.cursor()
+
+c.execute("""
+CREATE TABLE IF NOT EXISTS students(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    present INTEGER
+)
+""")
+
+def add_student():
+    name = input("Enter student name: ")
+    c.execute("INSERT INTO students(name,present) VALUES (?,?)",(name,0))
+    conn.commit()
+    print("Student added!")
+
+def mark_present():
+    list_students()
+    sid = int(input("Enter student ID to mark present: "))
+    c.execute("UPDATE students SET present=1 WHERE id=?",(sid,))
+    conn.commit()
+    print("Marked present!")
+
+def mark_absent():
+    list_students()
+    sid = int(input("Enter student ID to mark absent: "))
+    c.execute("UPDATE students SET present=0 WHERE id=?",(sid,))
+    conn.commit()
+    print("Marked absent!")
+
+def list_students():
+    c.execute("SELECT * FROM students")
+    rows = c.fetchall()
+    if not rows:
+        print("No students found.")
+    for r in rows:
+        status = "Present" if r[2] else "Absent"
+        print(r[0], r[1], status)
+
+def main():
+    while True:
+        print("\n--- Attendance System ---")
+        print("1. List Students")
+        print("2. Add Student")
+        print("3. Mark Present")
+        print("4. Mark Absent")
+        print("5. Exit")
+        choice = input("Enter choice: ")
+        if choice=="1": list_students()
+        elif choice=="2": add_student()
+        elif choice=="3": mark_present()
+        elif choice=="4": mark_absent()
+        elif choice=="5": break
+        else: print("Invalid choice!")
+
+main()
+conn.close()
